@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian E-Learning</title>
+
+    <!-- Link ke Google Fonts untuk font minimalis -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Global Styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #4e73df, #1e3d8f); /* Gradasi biru untuk latar belakang */
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 700;
+        }
+
+        input[type="text"], input[type="password"], select, button {
+            padding: 12px;
+            margin: 15px 0;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus, select:focus, button:focus {
+            outline: none;
+            border-color: #4e73df;
+            box-shadow: 0 0 8px rgba(78, 115, 223, 0.5);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px); /* Efek hover pada tombol */
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #e63946;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .submit-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 255, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 22px;
+            color: white;
+            text-align: center;
+            display: none;
+            z-index: 9999;
+            animation: fadeIn 1s ease;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f7f7f7;
+            border-radius: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .question-container:hover {
+            background-color: #eaeaea;
+        }
+
+        .answers input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .answers label {
+            font-size: 16px;
+        }
+
+        /* Animasi Fade In untuk notifikasi */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Penyesuaian ukuran dan layout pada mobile */
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .timer {
+                font-size: 18px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Halaman Login -->
+<div class="container login-container" id="login-page">
+    <h1>Selamat datang di Ujian E-Learning</h1>
+    <img src="https://www.example.com/logo-sekolah.png" alt="Logo Sekolah" width="150"> <!-- Ganti dengan URL logo sekolah Anda -->
+    <br><br>
+    <input type="text" id="username" placeholder="Masukkan Username" required>
+    <input type="password" id="password" placeholder="Masukkan Password" required>
+    <br><br>
+    <button onclick="startLogin()">Login</button>
+
+    <!-- Pesan error jika login salah -->
+    <div id="error-message" class="error-message" style="display: none;">Salah Username dan Password</div>
+</div>
+
+<!-- Halaman Pilih Mata Pelajaran -->
+<div class="container subject-container" id="subject-page" style="display: none;">
+    <h1>Pilih Mata Pelajaran</h1>
+    <select id="subject-select">
+        <option value="matematika">Matematika</option>
+        <option value="bahasa-indonesia">Bahasa Indonesia</option>
+        <option value="ipa">IPA</option>
+    </select>
+    <br><br>
+    <button onclick="startExam()">Mulai Ujian</button>
+</div>
+
+<!-- Halaman Ujian -->
+<div class="container exam-container" id="exam-page" style="display: none;">
+    <h1>Ujian E-Learning</h1>
+    <div class="timer" id="timer">Waktu: 10:00</div>
+    
+    <form id="quiz-form">
+        <!-- Soal akan dimasukkan di sini oleh JavaScript -->
+    </form>
+
+    <button type="button" class="submit-btn" onclick="submitExam()">Kirim Jawaban</button>
+
+    <div id="submit-notification" class="submit-notification">Jawaban sudah diterima!</div>
+</div>
+
+<script>
+    // Daftar soal untuk masing-masing mata pelajaran
+    const questions = {
+        matematika: [
+            { question: "Apa hasil dari 3 + 5?", options: ["6", "7", "8"], correct: "8" },
+            { question: "Berapa 10 x 10?", options: ["100", "200", "50"], correct: "100" },
+            { question: "Apa hasil dari 9 ÷ 3?", options: ["2", "3", "4"], correct: "3" },
+            { question: "Berapa 50 ÷ 5?", options: ["9", "8", "10"], correct: "10" },
+            { question: "Apa hasil dari 15 + 6?", options: ["21", "22", "20"], correct: "21" },
+            { question: "Apa hasil dari 6 x 7?", options: ["42", "40", "44"], correct: "42" },
+            { question: "Berapa 12 ÷ 4?", options: ["3", "2", "4"], correct: "3" },
+            { question: "Apa hasil dari 8 x 8?", options: ["64", "60", "56"], correct: "64" },
+            { question: "Berapa 9 + 11?", options: ["20", "18", "21"], correct: "20" },
+            { question: "Apa hasil dari 7 + 6?", options: ["12", "13", "14"], correct: "13" }
+        ],
+        bahasa_indonesia: [
+            { question: "Siapa penulis novel Laskar Pelangi?", options: ["Andrea Hirata", "Tere Liye", "Dewi Lestari"], correct: "Andrea Hirata" },
+            { question: "Apa arti kata 'serendah-rendahnya'?", options: ["Dalam keadaan rendah", "Sejauh mungkin", "Sekecil-kecilnya"], correct: "Sekecil-kecilnya" },
+            { question: "Kalimat manakah yang merupakan kalimat deklaratif?", options: ["Saya sedang belajar", "Apa yang kamu lakukan?", "Ayo kita pergi!"], correct: "Saya sedang belajar" },
+            { question: "Apa sinonim dari kata 'menarik'?", options: ["Indah", "Boring", "Membosankan"], correct: "Indah" },
+            { question: "Apa kepanjangan dari 'KTP'?", options: ["Kartu Tanda Penduduk", "Kartu Tempat Pembayaran", "Kartu Tertanda Pekerja"], correct: "Kartu Tanda Penduduk" }
+        ]
+    };
+
+    let timeRemaining = 10 * 60; // 10 menit
+    let timerInterval;
+
+    // Fungsi untuk mulai login
+    function startLogin() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (username === "admin" && password === "admin123") {
+            document.getElementById("login-page").style.display = "none";
+            document.getElementById("subject-page").style.display = "block";
+        } else {
+            document.getElementById("error-message").style.display = "block";
+        }
+    }
+
+    // Fungsi untuk mulai ujian
+    function startExam() {
+        const subject = document.getElementById("subject-select").value;
+        document.getElementById("subject-page").style.display = "none";
+        document.getElementById("exam-page").style.display = "block";
+        loadQuestions(subject);
+        startTimer();
+    }
+
+    // Fungsi untuk memuat soal
+    function loadQuestions(subject) {
+        const quizForm = document.getElementById("quiz-form");
+        const selectedQuestions = questions[subject];
+
+        quizForm.innerHTML = ''; // Clear previous questions
+
+        selectedQuestions.forEach((question, index) => {
+            let questionHTML = `
+                <div class="question-container">
+                    <h3>${question.question}</h3>
+                    <div class="answers">
+                        ${question.options.map((option, i) => `
+                            <input type="radio" id="q${index + 1}a${i}" name="q${index + 1}" value="${option}">
+                            <label for="q${index + 1}a${i}">${option}</label><br>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            quizForm.innerHTML += questionHTML;
+        });
+    }
+
+    // Fungsi untuk memulai timer
+    function startTimer() {
+        const timerDisplay = document.getElementById('timer');
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = `Waktu: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                alert("Waktu habis!");
+                submitExam(); // Kirim jawaban otomatis jika waktu habis
+            }
+        }, 1000);
+    }
+
+    // Fungsi untuk mengirim jawaban
+    function submitExam() {
+        const form = document.getElementById('quiz-form');
+        const allAnswered = [...form.elements].every(input => input.checked);
+
+        if (!allAnswered) {
+            alert("Pastikan Anda menjawab semua soal.");
+            return;
+        }
+
+        document.getElementById('exam-page').style.display = 'none';
+        const notification = document.getElementById('submit-notification');
+        notification.style.display = 'block';
+
+        setTimeout(() => {
+            notification.style.display = 'none';
+            document.getElementById('login-page').style.display = 'block';
+        }, 3000);
+    }
+</script>
+</body>
+</html>
